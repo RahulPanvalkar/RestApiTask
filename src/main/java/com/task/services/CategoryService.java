@@ -25,21 +25,30 @@ public class CategoryService {
         System.out.println("getAllCategories >> page : " + page + " & size : " + size);
         Map<String, Object> response = new HashMap<>();
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Category> pageCategories = categoryRepo.findAll(pageable);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Category> pageCategories = categoryRepo.findAll(pageable);
 
-        if (pageCategories.isEmpty()) {
+            if (pageCategories.isEmpty()) {
+                response.put("success", false);
+                response.put("error", createErrorMap(404, "No categories found in the system."));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            response.put("success", true);
+            response.put("message", "Request successful");
+            response.put("data", pageCategories.get());   // to get categories only and not include pagination metadata
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(404, "No categories found in the system."));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.put("error", createErrorMap(500, "An error occurred while fetching categories."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        response.put("success", true);
-        response.put("message", "Request successful");
-        response.put("data", pageCategories.get());   // to get categories only and not include pagination metadata
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
 
     public ResponseEntity<?> addCategory(Category category) {
         System.out.println("addCategory >> category : \n" + category);
@@ -72,13 +81,13 @@ public class CategoryService {
 
             response.put("success", true);
             response.put("message", "Product added successfully");
-            response.put("data", savedCategory); // Return ProductDTO in response
+            response.put("data", savedCategory);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
             e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(500, "Something went wrong."));
+            response.put("error", createErrorMap(500, "An error occurred while adding the category."));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -87,44 +96,60 @@ public class CategoryService {
         System.out.println("getCategory >> id :: " + id);
         Map<String, Object> response = new HashMap<>();
 
-        // Fetch the category by ID
-        Optional<Category> categoryOptional = categoryRepo.findById(id);
+        try {
+            // Fetch the category by ID
+            Optional<Category> categoryOptional = categoryRepo.findById(id);
 
-        if (categoryOptional.isEmpty()) {
+            if (categoryOptional.isEmpty()) {
+                response.put("success", false);
+                response.put("error", createErrorMap(404, "Category not found in the system."));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            response.put("success", true);
+            response.put("message", "Request successful");
+            response.put("data", categoryOptional.get());
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(404, "Category not found in the system."));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.put("error", createErrorMap(500, "An error occurred while fetching a category."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        response.put("success", true);
-        response.put("message", "Request successful");
-        response.put("data", categoryOptional.get());
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-
+    // Deleting a category will automatically remove all associated products due to the configured cascading relationship.
     @Transactional
     public ResponseEntity<?> deleteCategory(Long id) {
         System.out.println("deleteCategory >> id :: " + id);
         Map<String, Object> response = new HashMap<>();
 
-        // Fetch the category by ID
-        Optional<Category> categoryOptional = categoryRepo.findById(id);
+        try {
+            // Fetch the category by ID
+            Optional<Category> categoryOptional = categoryRepo.findById(id);
 
-        if (categoryOptional.isEmpty()) {
+            if (categoryOptional.isEmpty()) {
+                response.put("success", false);
+                response.put("error", createErrorMap(404, "Category not found in the system."));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            // Delete the category
+            categoryRepo.deleteById(id);
+
+            response.put("success", true);
+            response.put("message", "Category and its products deleted successfully");
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(404, "Category not found in the system."));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.put("error", createErrorMap(500, "An error occurred while deleting the category."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        // Delete the category
-        categoryRepo.deleteById(id);
-
-        response.put("success", true);
-        response.put("message", "Category deleted successfully");
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
@@ -176,9 +201,9 @@ public class CategoryService {
             return ResponseEntity.status(HttpStatus.OK).body(response);
 
         } catch (Exception e) {
-            e.printStackTrace(); // Log this exception properly (e.g., using a logger)
+            e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(500, "Something went wrong."));
+            response.put("error", createErrorMap(500, "An error occurred while updating the category."));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

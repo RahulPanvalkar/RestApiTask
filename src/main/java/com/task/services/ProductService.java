@@ -28,20 +28,28 @@ public class ProductService {
         System.out.println("getAllProducts >> page : " + page + " & size : " + size);
         Map<String, Object> response = new HashMap<>();
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Product> pageProducts = productRepo.findAll(pageable);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Product> pageProducts = productRepo.findAll(pageable);
 
-        if (pageProducts.isEmpty()) {
+            if (pageProducts.isEmpty()) {
+                response.put("success", false);
+                response.put("error", createErrorMap(400, "No products found in the system."));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            response.put("success", true);
+            response.put("message", "Request successful");
+            response.put("data", pageProducts.get());   // to get categories only and not include pagination metadata
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(400, "No products found in the system."));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.put("error", createErrorMap(500, "An error occurred while fetching products."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        response.put("success", true);
-        response.put("message", "Request successful");
-        response.put("data", pageProducts.get());   // to get categories only and not include pagination metadata
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     public ResponseEntity<?> addProduct(Product product) {
@@ -99,7 +107,7 @@ public class ProductService {
         } catch (Exception e) {
             e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(500, "Something went wrong."));
+            response.put("error", createErrorMap(500, "An error occurred while adding the product."));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
@@ -110,20 +118,28 @@ public class ProductService {
         System.out.println("getProduct >> id :: " + id);
         Map<String, Object> response = new HashMap<>();
 
-        // Fetch the category by ID
-        Optional<Product> productOptional = productRepo.findById(id);
+        try {
+            // Fetch the category by ID
+            Optional<Product> productOptional = productRepo.findById(id);
 
-        if (productOptional.isEmpty()) {
+            if (productOptional.isEmpty()) {
+                response.put("success", false);
+                response.put("error", createErrorMap(404, "Product not found in the system."));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            response.put("success", true);
+            response.put("message", "Request successful");
+            response.put("data", productOptional.get());
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(404, "Product not found in the system."));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.put("error", createErrorMap(500, "An error occurred while fetching a product."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        response.put("success", true);
-        response.put("message", "Request successful");
-        response.put("data", productOptional.get());
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     public ResponseEntity<?> deleteProduct(Long id) {
@@ -131,22 +147,30 @@ public class ProductService {
 
         Map<String, Object> response = new HashMap<>();
 
-        // Fetch the product by ID
-        Optional<Product> productOptional = productRepo.findById(id);
-        System.out.println(productOptional);
-        if (productOptional.isEmpty()) {
+        try {
+            // Fetch the product by ID
+            Optional<Product> productOptional = productRepo.findById(id);
+            System.out.println(productOptional);
+            if (productOptional.isEmpty()) {
+                response.put("success", false);
+                response.put("error", createErrorMap(404, "Product not found in the system."));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            // Delete the category
+            productRepo.deleteById(id);
+
+            response.put("success", true);
+            response.put("message", "Product deleted successfully");
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(404, "Product not found in the system."));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.put("error", createErrorMap(500, "An error occurred while deleting the product."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        // Delete the category
-        productRepo.deleteById(id);
-
-        response.put("success", true);
-        response.put("message", "Product deleted successfully");
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
 
     }
 
@@ -230,7 +254,7 @@ public class ProductService {
         } catch (Exception e) {
             e.printStackTrace();
             response.put("success", false);
-            response.put("error", createErrorMap(500, "Something went wrong."));
+            response.put("error", createErrorMap(500, "An error occurred while updating the product."));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 

@@ -22,7 +22,6 @@ public class CategoryController {
 
     @GetMapping("/categories")
     public ResponseEntity<?> getAllCategories(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
-        System.out.println("CategoryController >> getAllCategories..");
         return categoryService.getAllCategories(page, size);
     }
 
