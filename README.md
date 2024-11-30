@@ -1,5 +1,5 @@
 # RestApiTask
-This repository contains a CRUD REST API application. The application is built using Java 17 and Spring Boot 3.3.6 and demonstrates best practices for implementing RESTful APIs with proper error handling, validation, and database integration.
+This repository contains a CRUD REST API application. The application is built using `Java 17` and Spring Boot `3.3.6` and demonstrates best practices for implementing RESTful APIs with proper error handling, validation, and database integration.
 
 ## Features
 - CRUD Operations: Create, Read, Update, and Delete entities.
@@ -7,11 +7,12 @@ This repository contains a CRUD REST API application. The application is built u
 - Validation: Input validation for request payloads.
 - Error Handling: Consistent and structured error responses.
 - Environment Variables: Database credentials are managed securely using environment variables.
-- Technologies Used: Java 17 | Spring Boot 3.3.6 | Hibernate/JPA | MySQL
+- Technologies Used: `Java 17` | Spring Boot `3.3.6` | Hibernate/JPA | MySQL
 
 ## Setup Instructions
 - Prerequisites : Java 17 | Maven | MySQL Database | Git
 - Environment Variables : Set the following environment variables for database connectivity
+  
   | Variable    | Description                   | Example                       |
   |-------------|-------------------------------|-------------------------------|
   | DB_URL      | JDBC URL for your database    | jdbc:mysql://localhost:3306   |
@@ -19,8 +20,22 @@ This repository contains a CRUD REST API application. The application is built u
   | DB_PASSWORD | Password for the database     | Password                      |
 
 ## Database Schema
-- Category: Stores category information with fields like id, name and description.
-- Product: Stores product information with fields like id, name, price, quantity and a foreign key to Category.
+Categories Table: Stores category information with columns:<br>
+- category_id (Primary Key): Unique identifier for each category.
+- category_name: Name of the category.
+- description: Description of the category.
+- created_at: Timestamp when the category was created.
+- updated_at: Timestamp when the category was last updated.
+
+Products Table: Stores product information with columns:<br>
+- product_id (Primary Key): Unique identifier for each product.
+- product_name: Name of the product.
+- price: Price of the product.
+- quantity: Quantity available for the product.
+- description: Description of the product.
+- category_id (Foreign Key): References category_id in the categories table, establishing a relationship with categories.
+- created_at: Timestamp when the product was created.
+- updated_at: Timestamp when the product was last updated.
 
 ## API Endpoints
 
