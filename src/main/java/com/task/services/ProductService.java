@@ -19,10 +19,14 @@ import java.util.Optional;
 @Service
 public class ProductService {
 
+    private ProductRepo productRepo;
+    private CategoryRepo categoryRepo;
+
     @Autowired
-    ProductRepo productRepo;
-    @Autowired
-    CategoryRepo categoryRepo;
+    public ProductService(ProductRepo productRepo, CategoryRepo categoryRepo) {
+        this.productRepo = productRepo;
+        this.categoryRepo = categoryRepo;
+    }
 
     public ResponseEntity<?> getAllProducts(int page, int size) {
         System.out.println("getAllProducts >> page : " + page + " & size : " + size);

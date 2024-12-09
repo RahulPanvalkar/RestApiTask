@@ -1,10 +1,10 @@
 package com.task.entities;
 
-import java.time.LocalDate;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "categories")

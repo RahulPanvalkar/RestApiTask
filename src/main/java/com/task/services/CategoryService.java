@@ -18,8 +18,12 @@ import java.util.Optional;
 @Service
 public class CategoryService {
 
+    private CategoryRepo categoryRepo;
+
     @Autowired
-    CategoryRepo categoryRepo;
+    public CategoryService(CategoryRepo categoryRepo) {
+        this.categoryRepo = categoryRepo;
+    }
 
     public ResponseEntity<?> getAllCategories(int page, int size) {
         System.out.println("getAllCategories >> page : " + page + " & size : " + size);
